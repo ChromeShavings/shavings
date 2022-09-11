@@ -1,6 +1,6 @@
 # shavings
 
-<h1> IPAddress-Lookup Script </h1>
+<h1>IPAddress-Lookup</h1>
 
 <b>NOTE:</b> Please read this before running the script!
 
