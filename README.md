@@ -58,3 +58,8 @@ Weather API is unable to get information based on Longitude and Latitude
 Unable to Traceroute or Ping to obtain Latency and/or Approximate Hop Count (Disabled by IP owner)
 
 - Example 1 - (https://user-images.githubusercontent.com/113253306/189553494-f8eb2bf1-4a66-4724-95e9-abc317d749af.png)
+
+Example of JSON output
+
+- Example 1 - (https://user-images.githubusercontent.com/113253306/189553793-4f6eede9-9eca-4e23-b55d-e0d5a839d906.png)
+
