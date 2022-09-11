@@ -28,6 +28,8 @@ The script will output the following:
 - IP Address
 - Total Number of Hops from the client machine (machine you are on) and the desination IP
 - The average latency (in ms)
+- The latitude of where the IP is hosted
+- The longitude of where the IP is hosted
 - The city of where the IP is hosted
 - The state/region of where the IP is hosted
 - The country of where the IP is hosted
@@ -41,4 +43,18 @@ The script will output the following:
 - The owner of the IP Block
 
 <h2>Screenshot Output Examples</h2>
-![image](https://user-images.githubusercontent.com/113253306/189551316-c17b8551-f893-4fb5-8d5d-74c8a89a0b5d.png)
+
+Obtaining information from 8.8.8.8
+
+- Using ```-IPAddress``` only - (https://user-images.githubusercontent.com/113253306/189553663-785529ce-6393-4273-94a7-a35e853aeeb6.png)
+- Using ```-IPaddress``` and ```-OutputtoJson``` - (https://user-images.githubusercontent.com/113253306/189553616-5dd30ab0-14d1-407f-8616-5e80803020ea.png)
+
+
+Weather API is unable to get information based on Longitude and Latitude
+
+- Example 1 - 1.1.1.1 - (https://user-images.githubusercontent.com/113253306/189553579-4500fdcf-7198-42b8-8365-b13c374875ba.png)
+- Example 2 - 1.0.0.1 - (https://user-images.githubusercontent.com/113253306/189553246-4b1a6c01-b2e9-4c20-8359-1ae4226ea4e7.png)
+
+Unable to Traceroute or Ping to obtain Latency and/or Approximate Hop Count (Disabled by IP owner)
+
+- Example 1 - (https://user-images.githubusercontent.com/113253306/189553494-f8eb2bf1-4a66-4724-95e9-abc317d749af.png)
