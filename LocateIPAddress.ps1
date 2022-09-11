@@ -7,6 +7,10 @@ Param
          [string] $IPAddress,
 
    [Parameter(Mandatory=$false, position=1)]
+         [validatescript({ 
+         if (($_ | Test-Path)) {return $true} {throw "File path does not exist. Please include a proper file path to continue." }
+         if ($_ -notmatch "\.json$") { throw "The extension is not in .json format. Please include the specified filename with the .json extension." }
+         return $true})]
          [string] $OutputtoJson
 
 )
