@@ -21,55 +21,104 @@ if ($IPAddress -notmatch $ipv4Pattern -and $IPAddress -notmatch $ipv6Pattern)
     }
 
 else {
-Write-Host "Looking up IP Address now. Please wait." -ForegroundColor Green
-$Traceroute = Test-NetConnection -TraceRoute $($IPAddress) -InformationLevel Detailed
-#$Traceroute
 
 
-$PingDestination = Test-Connection $IPAddress -Count 10
-$Geolocation_Info = Invoke-RestMethod -Method Get -Uri "http://ip-api.com/json/$IPAddress" | Select *
-$Timezone = (Invoke-WebRequest "http://worldtimeapi.org/api/$($Geolocation_Info.timezone)")
-$TimezoneAbbreviation = ((Invoke-WebRequest "http://worldtimeapi.org/api/$($Geolocation_Info.timezone)") | ConvertFrom-Json).abbreviation
-$DateTime =  ($Timezone | ConvertFrom-Json).datetime.Substring(0,16)
-$GeoWeather = (((Invoke-WebRequest -Method Get "https://api.weather.gov/points/$($Geolocation_Info.lat),$($Geolocation_Info.lon)"))| ConvertFrom-Json).properties.forecast
-$WeatherToday = (Invoke-WebRequest -Method Get $GeoWeather | ConvertFrom-Json).properties.periods[0]
+    Write-Host "Looking up $IPAddress now. Please wait..." -ForegroundColor Green
 
-$Country = $Geolocation_Info.country
-$City = $Geolocation_Info.city
-$State = $Geolocation_Info.regionName
-$Zipcode = $Geolocation_Info.zip
-$Timezone = $Geolocation_Info.timezone
-$CurrentTemperature = $WeatherToday.temperature
-$CurrentForecast = $WeatherToday.shortForecast
-$TemperatureUnit = $WeatherToday.temperatureUnit
-$Windspeed = $WeatherToday.windSpeed
-$WindDirection = $WeatherToday.windDirection
-$ISP = $Geolocation_Info.isp
-$ASOwner = $Geolocation_Info.as
-$BlockOwner = $Geolocation_Info.org
-$TotalHops = $($Traceroute.TraceRoute.Count)
-$AverageLatency = $($PingDestination| Measure-Object -Property ResponseTime -Average | Select -ExpandProperty Average)
+    $Traceroute = Test-NetConnection -TraceRoute $($IPAddress) -InformationLevel Detailed
+    if (!(Test-Connection $IPAddress -Count 1 -Quiet)) {$PingDestination = "N/A"} else {$PingDestination = (Test-Connection $IPAddress -Count 10)}
 
-Write-Host "Below is the Lookup Information for your IP Address: $IPAddress" -ForegroundColor Cyan
-Write-Host "$TotalHops hop(s)" -ForegroundColor Green
-Write-Host "The average latency is $AverageLatency" -ForegroundColor Green
-Write-Host "$City is the city" -ForegroundColor Green
-Write-Host "$State is the state/region" -ForegroundColor Green
-Write-Host "$Country is the country" -ForegroundColor Green
-Write-Host "$Timezone is the Time Zone" -ForegroundColor Green
-Write-Host "$DateTime $TimezoneAbbreviation is the Date/Time" -ForegroundColor Green
-Write-Host "The temperature is $CurrentTemperature$TemperatureUnit, and $CurrentForecast" -ForegroundColor Yellow
-Write-Host "Wind Speeds traveling $WindDirection at $Windspeed" -ForegroundColor Yellow
-Write-Host "$ISP is the ISP" -ForegroundColor Green
-Write-Host "$ASOwner owns the AS Number" -ForegroundColor Green
-Write-Host "$BlockOwner is the IP Block Owner" -ForegroundColor Green
 
-if ($OutputtoJson)
-{
-Write-Host "Appending data to Json File and Exporting to desired location" -ForegroundColor Cyan
-$JsonFile = ($IPAddress, $TotalHops, $AverageLatency, $City, $State, $Country, $Timezone, $TimezoneAbbreviation, $DateTime, $CurrentTemperature, $TemperatureUnit, $Windspeed, $WindDirection, $ISP, $ASOwner, $BlockOwner) | ConvertTo-Json | Out-File -FilePath $OutputtoJson -Force -Verbose
-}
+    try {#Geolocation Info
+    $Geolocation_Info = Invoke-RestMethod -Method Get -Uri "http://ip-api.com/json/$IPAddress" | Select *
+    $Timezone = (Invoke-WebRequest "http://worldtimeapi.org/api/$($Geolocation_Info.timezone)")
+    $TimezoneAbbreviation = ((Invoke-WebRequest "http://worldtimeapi.org/api/$($Geolocation_Info.timezone)") | ConvertFrom-Json).abbreviation
+    $DateTime =  ($Timezone | ConvertFrom-Json).datetime.Substring(0,16)
+    $Country = $Geolocation_Info.country
+    $City = $Geolocation_Info.city
+    $State = $Geolocation_Info.regionName
+    $Zipcode = $Geolocation_Info.zip
+    $Timezone = $Geolocation_Info.timezone
+    $ISP = $Geolocation_Info.isp
+    $ASOwner = $Geolocation_Info.as
+    $BlockOwner = $Geolocation_Info.org
+    }
 
-}
+    catch {
+    $DateTime = 'N/A'
+    $Country = 'N/A'
+    $City = 'N/A'
+    $State = 'N/A'
+    $Zipcode = 'N/A'
+    $Timezone = 'N/A'
+    $ISP = 'N/A'
+    $ASOwner = 'N/A'
+    $BlockOwner = 'N/A'
+    }
 
-}
+    finally {
+    
+    
+        try {#Geoweather
+
+        $Geoweather = (Invoke-WebRequest -Method Get "https://api.weather.gov/points/$($Geolocation_Info.lat),$($Geolocation_Info.lon)" -ErrorAction SilentlyContinue | ConvertFrom-Json).properties.forecast
+        $WeatherNow = (Invoke-WebRequest -Method Get $GeoWeather | ConvertFrom-Json).properties.periods[0]
+        $CurrentTemperature = $WeatherNow.temperature
+        $CurrentForecast = $WeatherNow.shortForecast
+        $TemperatureUnit = $WeatherNow.temperatureUnit
+        $Windspeed = $WeatherNow.windSpeed
+        $WindDirection = $WeatherNow.windDirection
+        }
+
+        catch {
+        Write-Host "Could not obtain weather from location using the weather API."
+        Write-Host $_
+
+        $CurrentTemperature = 'N/A'
+        $CurrentForecast = 'N/A'
+        $TemperatureUnit = 'N/A'
+        $Windspeed = 'N/A'
+        $WindDirection = 'N/A'
+        }
+
+
+        finally {
+    
+
+
+            if ($($Traceroute.TraceRoute.Count) -ige 30) {$TotalHops = "30/Incomplete"} else {$TotalHops = ($($Traceroute.TraceRoute.Count))}
+            if ($PingDestination -like "N/A") {$AverageLatency = "N/A"} else {$AverageLatency = $($PingDestination| Measure-Object -Property ResponseTime -Average | Select -ExpandProperty Average)}
+
+            Write-Host "Below is the Lookup Information for your IP Address: $IPAddress" -ForegroundColor Cyan
+            Write-Host "$TotalHops hop(s)" -ForegroundColor Green
+            Write-Host "The average latency is $AverageLatency" -ForegroundColor Green
+            Write-Host "$City is the city" -ForegroundColor Green
+            Write-Host "$State is the state/region" -ForegroundColor Green
+            Write-Host "$Country is the country" -ForegroundColor Green
+            Write-Host "$Timezone is the Time Zone" -ForegroundColor Green
+            Write-Host "$DateTime $TimezoneAbbreviation is the Date/Time" -ForegroundColor Green
+            Write-Host "The temperature is $CurrentTemperature" -ForegroundColor Yellow
+            Write-Host "The temperature unit is $TemperatureUnit" -ForegroundColor Yellow
+            Write-Host "The current forecast is $CurrentForecast" -ForegroundColor Yellow
+            Write-Host "Wind Speeds traveling $WindDirection at $Windspeed" -ForegroundColor Yellow
+            Write-Host "$ISP is the ISP" -ForegroundColor Green
+            Write-Host "$ASOwner owns the AS Number" -ForegroundColor Green
+            Write-Host "$BlockOwner is the IP Block Owner" -ForegroundColor Green
+
+            if ($OutputtoJson)
+            {
+            Write-Host "Writing data to JSON file..."
+            $JsonFile = ($IPAddress, $TotalHops, $AverageLatency, $City, $State, $Country, $Timezone, $TimezoneAbbreviation, $DateTime, $CurrentTemperature, $TemperatureUnit, $Windspeed, $WindDirection, $ISP, $ASOwner, $BlockOwner) | ConvertTo-Json | Out-File -FilePath $OutputtoJson -Force
+            }
+
+        }#eof Geoweather finally
+
+    }#eof Geolocation Info finally
+
+}#eof else
+
+}#eof function
+
+      
+
+
