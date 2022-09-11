@@ -38,6 +38,8 @@ else {
     $Timezone = (Invoke-WebRequest "http://worldtimeapi.org/api/$($Geolocation_Info.timezone)")
     $TimezoneAbbreviation = ((Invoke-WebRequest "http://worldtimeapi.org/api/$($Geolocation_Info.timezone)") | ConvertFrom-Json).abbreviation
     $DateTime =  ($Timezone | ConvertFrom-Json).datetime.Substring(0,16)
+    $Longitude = $Geolocation_Info.lon
+    $Latitude = $Geolocation_Info.lat
     $Country = $Geolocation_Info.country
     $City = $Geolocation_Info.city
     $State = $Geolocation_Info.regionName
@@ -50,6 +52,8 @@ else {
 
     catch {
     $DateTime = 'N/A'
+    $Longitude = 'N/A'
+    $Latitude = 'N/A'
     $Country = 'N/A'
     $City = 'N/A'
     $State = 'N/A'
@@ -65,7 +69,7 @@ else {
     
         try {#Geoweather
 
-        $Geoweather = (Invoke-WebRequest -Method Get "https://api.weather.gov/points/$($Geolocation_Info.lat),$($Geolocation_Info.lon)" -ErrorAction SilentlyContinue | ConvertFrom-Json).properties.forecast
+        $Geoweather = (Invoke-WebRequest -Method Get "https://api.weather.gov/points/$($Latitude),$($Longitude)" -ErrorAction SilentlyContinue | ConvertFrom-Json).properties.forecast
         $WeatherNow = (Invoke-WebRequest -Method Get $GeoWeather | ConvertFrom-Json).properties.periods[0]
         $CurrentTemperature = $WeatherNow.temperature
         $CurrentForecast = $WeatherNow.shortForecast
@@ -96,6 +100,8 @@ else {
             Write-Host "Below is the Lookup Information for your IP Address: $IPAddress" -ForegroundColor Cyan
             Write-Host "$TotalHops hop(s)" -ForegroundColor Green
             Write-Host "The average latency is $AverageLatency" -ForegroundColor Green
+            Write-Host "The latitude of this location is $Latitude" -ForegroundColor Green
+            Write-Host "The longitude of this location is $Longitude" -ForegroundColor Green
             Write-Host "$City is the city" -ForegroundColor Green
             Write-Host "$State is the state/region" -ForegroundColor Green
             Write-Host "$Country is the country" -ForegroundColor Green
@@ -112,7 +118,7 @@ else {
             if ($OutputtoJson)
             {
             Write-Host "Writing data to JSON file..."
-            $JsonFile = ($IPAddress, $TotalHops, $AverageLatency, $City, $State, $Country, $Timezone, $TimezoneAbbreviation, $DateTime, $CurrentTemperature, $TemperatureUnit, $Windspeed, $WindDirection, $ISP, $ASOwner, $BlockOwner) | ConvertTo-Json | Out-File -FilePath $OutputtoJson -Force
+            $JsonFile = ($IPAddress, $TotalHops, $AverageLatency, $Latitude, $Longitude, $City, $State, $Country, $Timezone, $TimezoneAbbreviation, $DateTime, $CurrentTemperature, $TemperatureUnit, $Windspeed, $WindDirection, $ISP, $ASOwner, $BlockOwner) | ConvertTo-Json | Out-File -FilePath $OutputtoJson -Force
             }
 
         }#eof Geoweather finally
