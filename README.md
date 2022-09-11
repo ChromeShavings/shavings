@@ -39,3 +39,6 @@ The script will output the following:
 - The ISP of this IP
 - The owner of the AS Number
 - The owner of the IP Block
+
+<h2>Screenshot Output Examples</h2>
+![image](https://user-images.githubusercontent.com/113253306/189551316-c17b8551-f893-4fb5-8d5d-74c8a89a0b5d.png)
