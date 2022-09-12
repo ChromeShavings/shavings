@@ -94,9 +94,6 @@ else {
 
 
         finally {
-    
-
-
             if ($($Traceroute.TraceRoute.Count) -ige 30) {$TotalHops = "30/Incomplete"} else {$TotalHops = ($($Traceroute.TraceRoute.Count))}
             if ($PingDestination -like "N/A") {$AverageLatency = "N/A"} else {$AverageLatency = $($PingDestination| Measure-Object -Property ResponseTime -Average | Select -ExpandProperty Average)}
 
@@ -121,9 +118,30 @@ else {
 
             if ($OutputtoJson)
             {
-            Write-Host "Writing data to JSON file..."
-            $JsonFile = ($IPAddress, $TotalHops, $AverageLatency, $Latitude, $Longitude, $City, $State, $Country, $Timezone, $TimezoneAbbreviation, $DateTime, $CurrentTemperature, $HighToday, $LowToday, $Windspeed, $WindDirection, $ISP, $ASOwner, $BlockOwner) | ConvertTo-Json | Out-File -FilePath $OutputtoJson -Force
-            }
+            Write-Host "Writing data to JSON file..." -ForegroundColor Cyan
+            
+            $jsonBase = @{}
+            $jsonFile = @{}
+
+            $list = New-Object System.Collections.ArrayList
+            $list2 = New-Object System.Collections.ArrayList
+            $list3 = New-Object System.Collections.ArrayList
+            $list4 = New-Object System.Collections.ArrayList
+
+            $list.Add(@{"IP Address"=$IPAddress;"Average Latency"=$AverageLatency;}) | Out-Null
+            $list2.Add(@{"Latitude"=$Latitude;"Longitude"=$Longitude;"City"=$City;"State"=$State;"Country"=$Country;"Timezone"=$Timezone;"Timezone Abbreviation"=$TimezoneAbbreviation;"Current Time"=$DateTime;}) | Out-Null
+            $list3.Add(@{"Current Temperature"=$CurrentTemperature;"High Today"=$HighToday;"Low Today"=$LowToday;"Wind Speed"=$Windspeed;"Wind Direction"=$WindDirection;}) | Out-Null
+            $list4.Add(@{"ISP"=$ISP;"AS Owner"=$ASOwner;"IP Block Owner"=$BlockOwner;}) | Out-Null
+
+            $jsonFile.Add("IP Information",$list) | Out-Null
+            $jsonFile.Add("Geolocation Information",$list2) | Out-Null
+            $jsonFile.Add("Weather Information",$list3) | Out-Null
+            $jsonFile.Add("Owner Information",$list4) | Out-Null
+                
+            $jsonBase.Add("JSON Output", $JsonFile) | Out-Null
+
+            $jsonBase | ConvertTo-Json -Depth 10 | Out-File $OutputtoJson -Force
+            }#eof JSON Output If
 
         }#eof Geoweather finally
 
