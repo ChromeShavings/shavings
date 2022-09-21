@@ -34,16 +34,24 @@ The script will output the following:
 - The state/region of where the IP is hosted
 - The country of where the IP is hosted
 - The timezone (in 24 hr format) of the hosted IP
-- The temperature (if API info is available) of the location
-- The temperature unit (F/C - if API info is available) of the location
+- The temperature in Fahrenheit (if API info is available) of the location
+- The high for the day in Fahrenheit
+- The low for the day in Fahrenheit
 - The current forecast (if API info is available) of the location
-- The direction and speed of the wind at the location (if API info is available)
+- The direction (in degrees) and speed (in mph) of the wind at the location (if API info is available)
 - The ISP of this IP
 - The owner of the AS Number
 - The owner of the IP Block
 
-<h2>Screenshot Output Examples</h2>
+<h2>API's Used</h2>
 
+- http://ip-api.com/json (Free API used for geo-location information)
+
+- http://worldtimeapi.org/api (Free API used for time/timezone information)
+
+- https://api.openweathermap.org/data/2.5/weather? (Free API w/signup used for obtaining weather information) -- allows for 60 requests/min & 1 million gets/mo.
+
+<h2>Screenshot Output Examples</h2>
 Obtaining information from 8.8.8.8
 
 - Using ```-IPAddress``` only - (https://user-images.githubusercontent.com/113253306/189553663-785529ce-6393-4273-94a7-a35e853aeeb6.png)
@@ -61,5 +69,5 @@ Unable to Traceroute or Ping to obtain Latency and/or Approximate Hop Count (Dis
 
 Example of JSON output
 
-- Example 1 - (https://user-images.githubusercontent.com/113253306/189553793-4f6eede9-9eca-4e23-b55d-e0d5a839d906.png)
+- Example 1 - (https://user-images.githubusercontent.com/113253306/189572140-08b32010-2b21-4477-babc-b15293f9eddc.png)
 
